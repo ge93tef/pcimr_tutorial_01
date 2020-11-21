@@ -79,16 +79,16 @@ def checkWall():
     pub_velo.angular.x=0.0
     pub_velo.angular.y=0.0
     pub_velo.angular.z=0.0
-    maxVelo = 0.2 #max velocity
+    maxVelo = 0.5 #max velocity
     minDist = 0.30 #min DIstance to object
     maxDist = 2.0 #Distance until the robot can drive with maxVelo
 
     #Subscribers and Publisher
     scan = rospy.Subscriber('/scan', LaserScan, callback_Scan)
-    #velo_move = rospy.Publisher('input/cmd_vel', Twist, queue_size=10)
-    velo = rospy.Subscriber('/pioneer/cmd_vel', Twist, callback_Velo)
+    #velo_move = rospy.Publisher('cmd_vel', Twist, queue_size=10)
     velo_move = rospy.Publisher('/pioneer/cmd_vel', Twist, queue_size=10)
-    
+    velo = rospy.Subscriber('/pioneer/cmd_vel', Twist, callback_Velo)
+    #velo = rospy.Subscriber('/input/cmd_vel', Twist, callback_Velo)
 
     rospy.init_node('checkWall', anonymous=True)
     rate = rospy.Rate(2)
