@@ -8,16 +8,18 @@ from geometry_msgs.msg import Twist
 import numpy as np
 
 
-#Scan around me
+#Scan around the robot
 def callback_Scan(data):
     global global_scan
     global_scan = np.array(data.ranges)
 
+# callback of tje velocity
 def callback_Velo(data):
     global global_velo
     global global_velo_linear
     global_velo= [data.linear.x, data.linear.y, data.linear.z]  
     global_velo_linear = np.array([data.linear.x,data.linear.y ,data.linear.z]) 
+    #If velocity is more than max -> adjust it
     if((global_velo_linear > maxVelo).any()):
         print("Max speed exceeded", global_velo_linear)
         setMaxVelo(global_velo_linear)
@@ -33,6 +35,7 @@ def emergencyStop():
     pub_velo.angular.y=0.0
     pub_velo.angular.z=0.0
 
+#Function for setting velocity if max is reached
 def setMaxVelo(global_velo_linear):
     if(global_velo_linear[0] > maxVelo ):
         pub_velo.linear.x = maxVelo
@@ -41,7 +44,9 @@ def setMaxVelo(global_velo_linear):
     if(global_velo_linear[2]  > maxVelo):
         pub_velo.linear.z= maxVelo
 
+#Function to adjust speed ro distance
 def adjustSpeed():
+    print("Adjust velocity to distance")
     actualDist = np.amin(global_scan)-minDist
     rangeDist = maxDist-minDist # Allowed  Range
     #print("actualDist", actualDist)
@@ -100,7 +105,6 @@ def checkWall():
             emergencyStop()
             print("Emergency Stop")
             velo_move.publish(pub_velo)
-            #rospy.signal_shutdown("Emergency Stop")
         #Adjust speed relative to distance
         elif((global_scan < maxDist).any()):
             adjustSpeed()
