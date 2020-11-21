@@ -1,0 +1,7 @@
+<launch>
+    <node pkg="my_package_tut2" type="dontHitWallsNode.py" name="dontHitWallsNode" output="screen">
+         <param name="maxVelo" type="double" value="0.4" />
+         <param name="minDist" type="double" value="0.2" />
+         <param name="maxDist" type="double" value="2.0" />
+    </node>
+</launch>

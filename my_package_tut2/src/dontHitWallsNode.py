@@ -79,9 +79,9 @@ def checkWall():
     pub_velo.angular.x=0.0
     pub_velo.angular.y=0.0
     pub_velo.angular.z=0.0
-    maxVelo = 0.5 #max velocity
-    minDist = 0.30 #min DIstance to object
-    maxDist = 2.0 #Distance until the robot can drive with maxVelo
+    maxVelo = rospy.get_param('/dontHitWallsNode/maxVelo', 0.5) #max velocity
+    minDist = rospy.get_param('/dontHitWallsNode/minDist', 0.30) #min DIstance to object --> robot stopps if smaller
+    maxDist = rospy.get_param('/dontHitWallsNode/maxDist', 2.0) #Distance at which the robot will get slower
 
     #Subscribers and Publisher
     scan = rospy.Subscriber('/scan', LaserScan, callback_Scan)

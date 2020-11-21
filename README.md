@@ -23,3 +23,5 @@ My first solution workes for both, differential and omnidirectional drive as I u
 ## 3 Make sure your controller works now for both robots by testing it in the simulated world.
 It works if it doesn't get any new Input from the keyboard (No idea how to solve this)
 
+## 4  Write a simple launch-file for launching your controller with the necessary parameters
+my_package_tut2/launch/launchfile.launch
