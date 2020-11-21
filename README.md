@@ -3,11 +3,11 @@
 Branch: Tutorial 2
 
 
-For using keyboard to move around: rosrun teleop_twist_keyboard teleop_twist_keyboard.py cmd_vel:=/pioneer/cmd_vel\\
+For using keyboard to move around: rosrun teleop_twist_keyboard teleop_twist_keyboard.py cmd_vel:=/pioneer/cmd_vel
 
-For starting the robot: roslaunch rto_bringup_sim robot.launch\\
+For starting the robot: roslaunch rto_bringup_sim robot.launch
 
-Starting my node: rosrun my_package_tut2 dontHitWallsNode.py\\
+Starting my node: rosrun my_package_tut2 dontHitWallsNode.py
 
 
 
