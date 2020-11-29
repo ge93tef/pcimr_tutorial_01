@@ -31,11 +31,11 @@ def callback_map(data):
         mapGrid.info.height = 20
         mapGrid.info.width = 20
         map = np.copy(data.data).astype(np.float32)
-        probs = np.count_nonzero(map)
+        probs = map.shape[0]-np.count_nonzero(map)
         for i in range(1,map.shape[0]):
             if(map[i]==0):
-                map[i]=(1/probs)*100
-        mapGrid.data = map
+                map[i]=(1/probs)
+        mapGrid.data = map*100
         navi.publish(mapGrid)
     FirstTime=False
     my_lock.release()
