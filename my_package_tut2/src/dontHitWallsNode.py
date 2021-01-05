@@ -13,102 +13,78 @@ def callback_Scan(data):
     global global_scan
     global_scan = np.array(data.ranges)
 
-# callback of tje velocity
+# callback of the velocity
 def callback_Velo(data):
-    global global_velo
-    global global_velo_linear
-    global_velo= [data.linear.x, data.linear.y, data.linear.z]  
-    global_velo_linear = np.array([data.linear.x,data.linear.y ,data.linear.z]) 
-    #If velocity is more than max -> adjust it
-    if((global_velo_linear > maxVelo).any()):
-        print("Max speed exceeded", global_velo_linear)
-        setMaxVelo(global_velo_linear)
-        velo_move.publish(pub_velo)
+    global velo
+    velo = data #Twist
     
 
-#Any distance is beneath the min Distance = Stop everything
-def emergencyStop():
-    pub_velo.linear.x=0.0
-    pub_velo.linear.y=0.0
-    pub_velo.linear.z=0.0
-    pub_velo.angular.x=0.0
-    pub_velo.angular.y=0.0
-    pub_velo.angular.z=0.0
-
-#Function for setting velocity if max is reached
-def setMaxVelo(global_velo_linear):
-    if(global_velo_linear[0] > maxVelo ):
-        pub_velo.linear.x = maxVelo
-    if(global_velo_linear[1]  > maxVelo):
-        pub_velo.linear.y = maxVelo
-    if(global_velo_linear[2]  > maxVelo):
-        pub_velo.linear.z= maxVelo
-
 #Function to adjust speed ro distance
-def adjustSpeed():
-    print("Adjust velocity to distance")
-    actualDist = np.amin(global_scan)-minDist
-    rangeDist = maxDist-minDist # Allowed  Range
-    #print("actualDist", actualDist)
-    newVelo = maxVelo*(actualDist/rangeDist)#Calc new Velo
-    #If any Velo is above newVelo --> adjust
-    if(global_velo_linear[0]> newVelo ):
-        pub_velo.linear.x = newVelo
-    if(global_velo_linear[1]> newVelo):
-        pub_velo.linear.y = newVelo
-    if(global_velo_linear[2] > newVelo):
-        pub_velo.linear.z= newVelo
+def adjustSpeed(velo_move):
+    global velo
+    global global_scan
+    global minDist
+    global maxDist
+    global maxVelo
+    myDistX = np.amin(global_scan[81:164])
+    myDistYR = np.amin(global_scan[0:81])
+    myDistYL = np.amin(global_scan[164:245])
+    if(velo.linear.x > 0): #Is moving forward
+        if(myDistX < minDist): #Stop
+            velo.linear.x=0
+        elif(myDistX > minDist and myDistX < maxDist): #Adjust Speed
+            velo.linear.x=maxVelo*((myDistX-minDist)/(maxDist-minDist))
+        else: 
+            velo.linear.x=maxVelo
 
+    if(velo.linear.y > 0): #Is moving left
+        if(myDistYR < minDist): #Stop
+            velo.linear.y=0
+        elif(myDist > minDist and myDistYL < maxDist): #Adjust Speed
+            velo.linear.y=maxVelo*((myDistYL-minDist)/(maxDist-minDist))
+        else: 
+            velo.linear.y=maxVelo
+
+    if(velo.linear.y < 0): #Is moving right
+        if(myDistYR < minDist): #Stop
+            velo.linear.y=0
+        elif(myDistYR > minDist and myDistYR < maxDist): #Adjust Speed
+            velo.linear.y=-maxVelo*((myDistYR-minDist)/(maxDist-minDist))
+        else: 
+            velo.linear.y=-maxVelo 
+    velo_move.publish(velo)
 
 def checkWall():
     #GlobalValues
-    global pub_velo
     global maxVelo
     global minDist
-    global global_velo
     global maxDist
-    global global_scan
-    global global_velo_linear
-    global velo_move
-    global_velo_linear=np.array([0.0,0.0,0.0])
+    global velo
+    velo = Twist()
     #InitValues
-    pub_velo = Twist()
-    pub_velo.linear.x=0.0
-    pub_velo.linear.y=0.0
-    pub_velo.linear.z=0.0
-    pub_velo.angular.x=0.0
-    pub_velo.angular.y=0.0
-    pub_velo.angular.z=0.0
     maxVelo = rospy.get_param('/dontHitWallsNode/maxVelo', 0.5) #max velocity
     minDist = rospy.get_param('/dontHitWallsNode/minDist', 0.30) #min DIstance to object --> robot stopps if smaller
     maxDist = rospy.get_param('/dontHitWallsNode/maxDist', 2.0) #Distance at which the robot will get slower
-
+    robot = rospy.get_param('/dontHitWallsNode/ROBOT', 'rto-1') #Env
+    print("Environment ROBOT:", robot)
     #Subscribers and Publisher
-    scan = rospy.Subscriber('/scan', LaserScan, callback_Scan)
-    #velo_move = rospy.Publisher('cmd_vel', Twist, queue_size=10)
-    velo_move = rospy.Publisher('/pioneer/cmd_vel', Twist, queue_size=10)
-    velo = rospy.Subscriber('/pioneer/cmd_vel', Twist, callback_Velo)
-    #velo = rospy.Subscriber('/input/cmd_vel', Twist, callback_Velo)
+    if(robot == 'rto-1'):
+        velo_move = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+    else:
+        velo_move = rospy.Publisher('/pioneer/cmd_vel', Twist, queue_size=10)
+    #velo_move = rospy.Publisher('/pioneer/cmd_vel', Twist, queue_size=10)
+    velocity = rospy.Subscriber('/input/cmd_vel', Twist, callback_Velo)
 
     rospy.init_node('checkWall', anonymous=True)
-    rate = rospy.Rate(2)
-
-
-    subrate = rospy.Rate(1)
-    pubrate = rospy.Rate(0.5)
+    rate=30.0
 
     while (not rospy.is_shutdown()):
-        subrate.sleep()
-        #Check if robot is already to close
-        print('Velocity', global_velo_linear)
-        if((global_scan < minDist).any()):
-            emergencyStop()
-            print("Emergency Stop")
-            velo_move.publish(pub_velo)
-        #Adjust speed relative to distance
-        elif((global_scan < maxDist).any()):
-            adjustSpeed()
-            velo_move.publish(pub_velo)
+        #subrate.sleep()
+        newScan = rospy.wait_for_message("scan", LaserScan)
+        callback_Scan(newScan)
+        adjustSpeed(velo_move)
+        if rate:
+               rospy.sleep(1/rate)
 
 if __name__ == '__main__':
     checkWall()
