@@ -1,6 +1,8 @@
 I adjusted the launch file, it now gives the ROBOT variable to the program and starts the right Gazebo.
 Pls ONLY start with launch file:
+
 roslaunch my_package_tut2 launchfile.launch
+
 (Otherwise the export variable will get ignored no idea why)
 
 
