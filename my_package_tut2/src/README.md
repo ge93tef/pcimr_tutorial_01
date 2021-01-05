@@ -6,7 +6,7 @@ roslaunch my_package_tut2 launchfile.launch
 
 I had two main mistakes in my prev version:
 
-1) I got confues with the three differen sub/pub: cmd_vel, input/cmd_vel and pioneer/cmd_vel. In my prev version the keyboard directly published to gazebo and therefor values where not "filtered" trough my program leading to the behaviour that it only works if i press the button once not more.
+1) I got confused with the three different sub/pub: cmd_vel, input/cmd_vel and pioneer/cmd_vel. In my prev version the keyboard directly published to gazebo and therefor values where not "filtered" trough my program leading to the behaviour that it only works if I press the button once and not more often.
 
 2) The publish/subscriber order was not working correct
 
