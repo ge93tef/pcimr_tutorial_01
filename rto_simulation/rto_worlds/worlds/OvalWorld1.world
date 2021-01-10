@@ -88,15 +88,15 @@
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
     <state world_name='default'>
-      <sim_time>44 259000000</sim_time>
-      <real_time>20 255387793</real_time>
-      <wall_time>1610221517 893101171</wall_time>
-      <iterations>20195</iterations>
-      <model name='Oval1'>
-        <pose>-0.065195 0.058105 0 0 -0 0</pose>
+      <sim_time>61 99000000</sim_time>
+      <real_time>16 902065998</real_time>
+      <wall_time>1610291651 708994432</wall_time>
+      <iterations>16840</iterations>
+      <model name='Oval1_0'>
+        <pose>-0.016824 0.010438 0 0 -0 0</pose>
         <scale>1 1 1</scale>
         <link name='link_0'>
-          <pose>-0.065195 0.058105 0 0 -0 0</pose>
+          <pose>-0.016824 0.010438 0 0 -0 0</pose>
           <velocity>0 0 0 0 -0 0</velocity>
           <acceleration>0 0 0 0 -0 0</acceleration>
           <wrench>0 0 0 0 -0 0</wrench>
@@ -118,12 +118,12 @@
     </state>
     <gui fullscreen='0'>
       <camera name='user_camera'>
-        <pose>11.153 -11.4047 9.25976 0 0.511643 2.3362</pose>
+        <pose>16.2401 -15.8449 14.3571 0 0.511643 2.3362</pose>
         <view_controller>orbit</view_controller>
         <projection_type>perspective</projection_type>
       </camera>
     </gui>
-    <model name='Oval1'>
+    <model name='Oval1_0'>
       <link name='link_0'>
         <inertial>
           <mass>1</mass>
@@ -135,17 +135,13 @@
             <iyz>0</iyz>
             <izz>0.166667</izz>
           </inertia>
-          <pose>0 0 0 0 -0 0</pose>
         </inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <self_collide>0</self_collide>
-        <enable_wind>0</enable_wind>
-        <kinematic>0</kinematic>
         <visual name='visual'>
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>/home/katja/Dokumente/FinalProjekt/Oval.dae</uri>
+              <uri>/home/katja/rob_ws/src/pcimr_tutorial_01/Oval.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -166,7 +162,7 @@
           <pose>0 0 0 0 -0 0</pose>
           <geometry>
             <mesh>
-              <uri>/home/katja/Dokumente/FinalProjekt/Oval.dae</uri>
+              <uri>/home/katja/rob_ws/src/pcimr_tutorial_01/Oval.dae</uri>
               <scale>1 1 1</scale>
             </mesh>
           </geometry>
@@ -216,10 +212,13 @@
             </contact>
           </surface>
         </collision>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
       </link>
       <static>1</static>
-      <allow_auto_disable>1</allow_auto_disable>
-      <pose>-0.065195 0.058105 -9e-06 1e-06 2e-06 0</pose>
+      <allow_auto_disable>0</allow_auto_disable>
+      <pose>-0.016824 0.010438 0 0 -0 0</pose>
     </model>
   </world>
 </sdf>
