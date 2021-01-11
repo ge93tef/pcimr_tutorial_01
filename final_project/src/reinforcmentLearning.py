@@ -30,10 +30,10 @@ class learnToMove:
     def __init__(self):
         self.learnRate = rospy.get_param('~/learnRate', 0.7) #LearnRate
         self.epsilon = rospy.get_param('~/epsilon', 0.4) #Randomness
-        self.gamma = rospy.get_param('~/gamma', 0.85) #forQCalc
+        self.gamma = rospy.get_param('~/gamma', 0.9) #forQCalc
         self.actionValues = rospy.get_param('~/actionValues', [0.2,0.3,0.4, 0.2]) #Speed0,Speed1,Speed2,SpeedTurn
         self.maxEpisodes = rospy.get_param('~/maxEpisodes', 5)
-        self.amountBlocks = rospy.get_param('~/amountBlocks', 8)
+        self.amountBlocks = rospy.get_param('~/amountBlocks', 11)
         self.newVelo = Twist()
         self.velo_move = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
         self.move_sub = rospy.Subscriber('/input/cmd_vel', Twist, self.callbackMove)
@@ -81,7 +81,7 @@ class learnToMove:
         self.actions = np.array(['LeftTurn', 'Speed0', 'RightTurn', 'Speed1', 'Speed2']) #See above
         self.stateSpace = self.getSpaceState(self.scan)
         self.QTable = np.zeros((2, self.actions.shape[0] ))
-        self.rewards = np.array([0.04,0.02,0.01,-0.1, 0.1, 0.1, 0.001]) # outerDistance, InnerDistance, Straight, TooCloseToWall, Speed, ScaleDiff, Reward Steps
+        self.rewards = np.array([0.04,0.02,0.01,-0.1, 0.05, 0.1, 0.001]) # outerDistance, InnerDistance, Straight, TooCloseToWall, Speed, ScaleDiff, Reward Steps
         self.reset_simulation = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
         self.reset_simulation()
 
@@ -112,30 +112,21 @@ class learnToMove:
             self.newVelo.linear.x = actionValues[3]
         self.velo_move.publish(self.newVelo)  #Publish
         self.checkDistance() #checkDistanceForRewards
-        #CheckSpeed
         if(self.newVelo.linear.x > 0.1):
             reward = reward + self.newVelo.linear.x *self.rewards[4]
         #Check Outer
-        if(self.scan[33]== self.scan[212]):
+        if(np.abs(self.scan[33]-self.scan[212])<=0.2):
             reward = reward + self.rewards[0]
         #Punish Difference
         else:
             diff = np.abs(self.scan[33]-self.scan[212])
             reward = reward -diff *self.rewards[5]
-        #Check Straight
-        if(self.scan[120]>0.7):
-            reward = reward + self.rewards[2]
         #HitWall
-        if(np.amin(self.scan)<=0.19):
-            print('Lost Game Collision')
+        if(np.amin(self.scan)<=0.15):
+            print('Lost Game: Collision')
             lost=True
-        if(self.scan[33]>2.0 or self.scan[212]>2.0):
-            lost=True
-            print('Lost Game Rotation')
         if(np.amin(self.scan)<=0.3):
             reward = reward + self.rewards[3]
-        #if(np.amin(self.scan[33:212])<=0.3):
-          #  reward = reward + self.rewards[3]
         reward = reward + self.steps * self.rewards[6]
         return reward, lost
 
@@ -154,18 +145,18 @@ class learnToMove:
                 episode = episode +1
                 print("Episode", episode)
                 print('Steps', self.steps)
-                print('overallReward', overallReward+100)
+                print('overallReward', overallReward)
                 self.reset_simulation() 
                 currentState = self.stateSpace[1]
                 self.newVelo.linear.x = 0
                 self.newVelo.angular.z = 0
                 lost=False
-                if(episode > 10):
+                if(episode > 14):
                     self.epsilon = 0.3
                 if(episode > 15):
                     self.epsilon = 0.2
                 if(overallReward > 3000 and episode > 20):
-                    self.epsilon = 0.001
+                    self.epsilon = 0.01
                 overallReward = 0
                 print("Epsilon", self.epsilon)
                 self.steps = 0
@@ -183,7 +174,7 @@ class learnToMove:
             oldState=np.copy(currentState)
             myReward, lost = self.makeAction(chooseAction,self.actionValues)
             if(lost):
-                myReward = -500
+                myReward = -150
             currentState,stateId, self.stateSpace, self.QTable=self.getState(self.scan , self.stateSpace, self.QTable)
             oldState,oldStateId,self.stateSpace, self.QTable=self.getState(oldState, self.stateSpace, self.QTable)
             self.QTable[oldStateId, actionId] = self.QTable[oldStateId, actionId] + self.learnRate * (myReward+self.gamma*np.max(self.QTable[stateId, :]) - self.QTable[oldStateId,actionId])
