@@ -1,0 +1,22 @@
+<launch>
+    <arg name="robot" default="$(optenv ROBOT p3dx)" doc="Robot type [p3dx]"/>
+    <arg name="x_pos" default="100.0"/>
+    <arg name="y_pos" default="0.0"/>
+    <arg name="z_pos" default="0.0"/>
+    <arg name="yaw_pos" default="1.5"/>
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+        <param name="publish_frequency" type="double" value="20.0" />
+    </node>
+    <include file="$(find stdr_robot)/launch/robot_manager.launch" />
+
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find rto_description)/urdf/$(arg robot).urdf.xacro" />
+
+	<node type="stdr_server_node" pkg="stdr_server" name="stdr_server" output="screen" args="$(find stdr_resources)/maps/ovalTrack.yaml"/>
+
+	<node pkg="tf" type="static_transform_publisher" name="world2map" args="0 0 0 0 0 0  world map 100" />
+	
+	<include file="$(find stdr_gui)/launch/stdr_gui.launch"/>
+
+    <node pkg="stdr_robot" type="robot_handler" name="$(anon robot_spawn)" args="add $(find stdr_resources)/resources/robots/rto-1.yaml 98 80 -4.5" />
+</launch>
